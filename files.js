@@ -1,9 +1,41 @@
-// ^ ES Module ("type": "module" у package.json):
+// ES Module vs CommonJS
+// ^ ES Module ("type": "module" у package.json). Або перейменовувати кожне розширення .js на .mjs
+// ^ Щоб змусити Node.js обробляти файл як CommonJS модуль незалежно від налаштувань package.json можна перейменувати розширення .js на .cjs
+
+// fs.readFile(filename, [options]) – читання файлу
+// fs.writeFile(filename, data, [options]) – запис файлу (перезаписує файл або, у випадку з текстом, перезаписує зміст файлу)
+
+// fs.appendFile(filename, data, [options]) – додавання у файл
+// filename - абсолютний шлях до файлу з його ім'ям та розширенням
+// data - дані, що треба додати до файлу. Наприклад, текст
+
+// fs.rename(oldPath, newPath) – перейменування файлу.
+// fs.unlink(path, callback) – видалення файлу.
 
 // ~ CommonJS:
-// const fs = require("fs").promises;
+// Імпорт:
+const fs = require("fs").promises;
+// або:
+// const fs = require("fs/promises");
 
-// import fs from "fs";
+// Експорт:
+// module.exports = {value1, function1};
+
+// Можна імпортувати одразу одним рядком
+// Замість цього запису:
+const { getCurrentMonth } = require("./date");
+const currentMonth1 = getCurrentMonth();
+console.log("currentMonth1:::", currentMonth1);
+
+// ...можна імпортувати функцію так:
+const currentMonth2 = require("./date").getCurrentMonth();
+console.log("currentMonth2:::", currentMonth2);
+
+// Рееспорт:
+// Спочатку треба все імпортувати, а потім все експортувати одним об'єктом
+const obj = require("./users");
+const { function1 } = require("./users");
+module.exports = { obj, function1 };
 
 // fs.readdir(__dirname).then(files =>
 //   Promise.all(
@@ -17,6 +49,44 @@
 //     }),
 //   ).then(result => console.table(result)),
 // );
+
+// Раніше, коли не було промісів, то використовували callback. Першим аргументом була помилка, другим - дані файлу у сирому вигляді (Buffer):
+fs.readFile("./files/file.txt", (error, data) => {
+  console.log(error); // якщо помилки не буде, то тут буде null
+  console.log(data); // Buffer
+});
+
+// Після появи промісів:
+fs.readFile("./files/file.txt")
+  .then(data => console.log(data)) // Buffer
+  .catch(error => console.log(error.message));
+
+// Використання промісів через асинхронну функцію:
+const fileFunc = async path => {
+  try {
+    console.log("try start");
+    const buffer = await fs.readFile(path);
+    console.log("buffer:::", buffer);
+    const data1 = buffer.toString();
+    console.log("readFileFn >> data1:::", data1);
+
+    // Другий варіант як отримати текст з файлу - передати другим аргументом кодування (toString() за замовчуванням використовує кодування "utf-8"):
+    const data2 = await fs.readFile(path, "utf-8");
+    console.log("readFileFn >> data2:::", data2);
+
+    // Додавання тексту у файл (fs.appendFile(filename, data, [options])):
+    const result = fs.appendFile(path, "\nДоданий у файл текст"); // \n додасть текст з нового рядку, а не одразу після існуючого тексту
+    console.log("readFileFn >> result:::", result); // у result буде undefined, бо appendFile повертає undefined.
+
+    // Перезапис файлу (перезапис тексту файлу у цьому прикладі):
+    fs.writeFile(path, "Новий текст, що перезапише існуючий", [options]);
+  } catch (error) {
+    console.log("error start");
+    console.log("error:::", error.message);
+  }
+};
+
+fileFunc("./files/file.txt");
 
 // ~ ECMA Script:
 // __dirname: Працює лише в CommonJS.
