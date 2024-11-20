@@ -3,9 +3,9 @@
 // ^ Щоб змусити Node.js обробляти файл як CommonJS модуль незалежно від налаштувань package.json можна перейменувати розширення .js на .cjs
 
 // fs.readFile(filename, [options]) – читання файлу
-// fs.writeFile(filename, data, [options]) – запис файлу (перезаписує файл або, у випадку з текстом, перезаписує зміст файлу)
+// fs.writeFile(filename, data, [options]) – запис файлу (перезаписує файл або, у випадку з текстом, перезаписує зміст файлу). Якщо такого файлу нема, то він буде створений.
 
-// fs.appendFile(filename, data, [options]) – додавання у файл
+// fs.appendFile(filename, data, [options]) – додавання у файл. Якщо такого файлу нема, то він буде створений.
 // filename - абсолютний шлях до файлу з його ім'ям та розширенням
 // data - дані, що треба додати до файлу. Наприклад, текст
 
@@ -62,9 +62,9 @@ fs.readFile("./files/file.txt")
   .catch(error => console.log(error.message));
 
 // Використання промісів через асинхронну функцію:
-const fileFunc = async path => {
+const textFileFunc = async path => {
   try {
-    console.log("try start");
+    // * Читання файлу
     const buffer = await fs.readFile(path);
     console.log("buffer:::", buffer);
     const data1 = buffer.toString();
@@ -74,19 +74,24 @@ const fileFunc = async path => {
     const data2 = await fs.readFile(path, "utf-8");
     console.log("readFileFn >> data2:::", data2);
 
-    // Додавання тексту у файл (fs.appendFile(filename, data, [options])):
+    // * Додавання тексту у файл (fs.appendFile(filename, data, [options])):
     const result = fs.appendFile(path, "\nДоданий у файл текст"); // \n додасть текст з нового рядку, а не одразу після існуючого тексту
     console.log("readFileFn >> result:::", result); // у result буде undefined, бо appendFile повертає undefined.
 
-    // Перезапис файлу (перезапис тексту файлу у цьому прикладі):
-    fs.writeFile(path, "Новий текст, що перезапише існуючий", [options]);
+    fs.appendFile("./files/file2.txt", "\nДоданий у файл текст"); // створить неіснуючий досі файл file2.txt
+
+    // * Перезапис файлу (перезапис тексту файлу у цьому прикладі):
+    fs.writeFile(path, "Новий текст, що перезапише існуючий");
+    fs.writeFile("./files/file3.txt", "Новий текст, що перезапише існуючий"); // створить неіснуючий досі файл file2.txt
+
+    // * Видалення файлу
+    fs.unlink("./files/file3.txt"); // видалить файл file3.txt
   } catch (error) {
-    console.log("error start");
     console.log("error:::", error.message);
   }
 };
 
-fileFunc("./files/file.txt");
+textFileFunc("./files/file.txt");
 
 // ~ ECMA Script:
 // __dirname: Працює лише в CommonJS.
