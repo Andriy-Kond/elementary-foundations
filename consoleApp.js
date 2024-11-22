@@ -52,28 +52,55 @@ const mind = Math.ceil(Math.random() * 10); // загадане число (gues
 
 const logFileName = program.opts().fileName; // logFileName – файл, куди будуть збережені результати гри. .fileName - це назва того файлу, що вказується в аргументі --fileName (-f). Ім'я змінної має збігатись, тобто --fileName та program.opts().fileName.
 
-// Input value validator
+/**
+ * Input value validator
+ * @param {number} value
+ * @returns {boolean}
+ */
 const isValid = value => {
   // Number.isNaN(value) === isNaN(value)
   if (isNaN(value)) {
-    console.log("Це виглядає як рядок. Введіть число.".red);
+    console.log("Це виглядає як рядок. Введіть число.".bgRed);
     return false;
   }
 
   if (value < 1 || value > 10) {
-    console.log("Число має бути в діапазоні від 1 до 10".red);
+    console.log("Число має бути в діапазоні від 1 до 10".bgRed);
     return false;
   }
 
   if (!Number.isInteger(value)) {
-    console.log("Число має бути ціле, а не дробне".red);
+    console.log("Число має бути ціле, а не дробне".bgRed);
     return false;
   }
 
   return true;
 };
 
+const isValid_variant2 = value => {
+  if (
+    !Number.isNaN(value) &&
+    value > 1 &&
+    value < 10 &&
+    Number.isInteger(value)
+  )
+    return true;
+
+  if (isNaN(value)) console.log("Це виглядає як рядок. Введіть число.".red);
+  if (value < 1 || value > 10)
+    console.log("Число має бути в діапазоні від 1 до 10".red);
+  if (!Number.isInteger(value))
+    console.log("Число має бути ціле, а не дробне".red);
+
+  return false;
+};
+
 // Всі асинхронні функції треба загортати у try...catch
+/**
+ * Logger of game results
+ * @param {string} data
+ * @returns {Promise<void>}
+ */
 const logger = async data => {
   try {
     await fs.appendFile(logFileName, `${data}\n`); // записуємо дані (data) у файл
@@ -90,6 +117,9 @@ const logger = async data => {
   }
 };
 
+/**
+ * Main game loop.
+ */
 const game = () => {
   // .question() - це як інтерактивний promt у браузері
   rl.question(
