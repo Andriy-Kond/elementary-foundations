@@ -95,7 +95,8 @@ const isValid_variant2 = value => {
   return false;
 };
 
-// Всі асинхронні функції треба загортати у try...catch
+// ! Весь асинхронний код (все що "async...await") треба загортати у try...catch! (але не коли використовуються ланцюжки .then(()=>{}).catch(err=>{}).finally(()=>{}))
+
 /**
  * Logger of game results
  * @param {string} data
